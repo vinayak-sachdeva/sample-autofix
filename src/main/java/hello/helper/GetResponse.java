@@ -1,6 +1,7 @@
 package hello.helper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class GetResponse {
@@ -24,6 +25,6 @@ public class GetResponse {
     }
 
     public List<GetResponseIssue> getIssues() {
-        return issues;
+        return Collections.unmodifiableList(issues);
     }
 }
