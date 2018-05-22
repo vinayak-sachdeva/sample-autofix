@@ -24,9 +24,7 @@ public class IssueController {
     private Driver driver;
 
     private void setNeo4jDriver(String url) {
-        final String username = "neo4j";
-        final String password = "password";
-        driver = GraphDatabase.driver( url, AuthTokens.basic( username, password ) );
+        driver = GraphDatabase.driver( url, AuthTokens.basic( Constants.USER, Constants.PASS) );
     }
 
     private CodeGenPostResponse sendPostRequestCodeGen(String url, String json) {
