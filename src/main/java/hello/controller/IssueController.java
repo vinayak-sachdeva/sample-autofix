@@ -10,6 +10,7 @@ import org.aspectj.apache.bcel.classfile.Code;
 import org.neo4j.driver.v1.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import hello.helper.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -28,101 +29,6 @@ public class IssueController {
         final String username = "neo4j";
         final String password = "password";
         driver = GraphDatabase.driver( url, AuthTokens.basic( username, password ) );
-    }
-
-    class PostResponse {
-        private Integer fixId;
-        private String status;
-        public PostResponse(Integer fixId, String status) {
-            this.fixId = fixId;
-            this.status = status;
-        }
-    }
-
-    class GetResponseIssue {
-        private Integer id;
-        private String issueType;
-        private String line;
-        private String file;
-        private String columnName;
-        private Boolean isFixed;
-
-        GetResponseIssue(Integer id, String issueType, String line, String file, String columnName, Boolean isFixed) {
-            this.id = id;
-            this.issueType = issueType;
-            this.line = line;
-            this.file = file;
-            this.columnName = columnName;
-            this.isFixed = isFixed;
-        }
-    }
-
-    class GetResponse {
-        private Integer fixId;
-        private List<GetResponseIssue> issues;
-        private String s3Link;
-        private String status;
-
-        public GetResponse(Integer fixId, String s3Link, String status) {
-            this.fixId = fixId;
-            this.s3Link = s3Link;
-            this.status = status;
-            this.issues = new ArrayList<GetResponseIssue>();
-        }
-
-        public GetResponse(Integer fixId, String status) {
-            this.fixId = fixId;
-            this.status = status;
-            this.s3Link = "";
-            this.issues = new ArrayList<GetResponseIssue>();
-        }
-
-        public List<GetResponseIssue> getIssues() {
-            return issues;
-        }
-    }
-
-    class CodeGenPostResponse {
-        Integer id;
-        CodeGenPostResponse(Integer id) {
-            this.id = id;
-        }
-    }
-
-    class CodeGenPostRequest {
-        String url;
-        String username;
-        String password;
-        Set<Integer> fileIds;
-
-        CodeGenPostRequest(String url, String username, String password) {
-            this.url = url;
-            this.username = username;
-            this.password = password;
-            this.fileIds = new HashSet<Integer>();
-        }
-    }
-
-    class CodeGenGetResponse {
-        String status;
-        String Url;
-
-        CodeGenGetResponse(String status, String Url) {
-            this.status = status;
-            this.Url = Url;
-        }
-    }
-
-    private static final String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-    public static String randomAlphaNumeric() {
-        int count = 10;
-        StringBuilder builder = new StringBuilder();
-        while (count-- != 0) {
-            int character = (int)(Math.random()*ALPHA_NUMERIC_STRING.length());
-            builder.append(ALPHA_NUMERIC_STRING.charAt(character));
-        }
-        return builder.toString();
     }
 
     private CodeGenPostResponse sendPostRequestCodeGen(String url, String json) {
@@ -211,6 +117,7 @@ public class IssueController {
                 for(Record record : result) {
                     fixesRepo.save(new Fixes(fixId, issueRepo.findById(issueId).get(), sandBoxUrl, Integer.toString(record.get("line").asInt()), record.get("file").asString(), Integer.toString(record.get("columnName").asInt()), false));
                 }
+
                 session.close();
                 driver.close();
                 return new Gson().toJson(new PostResponse(fixId, "200"));
