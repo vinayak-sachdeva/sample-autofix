@@ -4,9 +4,7 @@ import com.google.gson.Gson;
 import hello.entity.Fixes;
 import hello.repo.FixesRepo;
 import hello.repo.IssueRepo;
-import javassist.compiler.CodeGen;
 import okhttp3.*;
-import org.aspectj.apache.bcel.classfile.Code;
 import org.neo4j.driver.v1.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -99,20 +97,18 @@ public class IssueController {
     @GetMapping(path="/fix", produces = "application/json")
     public String fixIssue(@RequestParam(value="issueId") Integer issueId, @RequestParam(value="sandBoxUrl") String sandBoxUrl) {
         setNeo4jDriver(sandBoxUrl);
-        String USER = "neo4j";
-        String PASS = "password";
-        CodeGenPostRequest codeGenPostRequest = new CodeGenPostRequest(sandBoxUrl, USER, PASS);
+        CodeGenPostRequest codeGenPostRequest = new CodeGenPostRequest(sandBoxUrl, Constants.USER, Constants.PASS);
         Session session = driver.session();
         List<Record> result;
         switch (issueId) {
             case 1:
-                result = session.run("match (n:MethodDeclaration)<-[:member]-(:TypeDeclaration{entity_type:\"class\"})<-[:DEFINE]-(file:File) where not n.modifiers =~ \"\\\\[(public|private|protected)?(, )?(static)?(, )?(abstract)?(, )?(synchronized)?(, )?(transient|volatile)?(, )?(final)?(, )?(native)?(, )?(strictfp)?(, )?\\\\]\" return id(n) as method_id, n.line as line, n.file as file, n.col as columnName, id(file) as file_id, n.modifiers as modifiers").list();
+                result = session.run(Constants.QUERY1).list();
                 for(Record record : result) {
                     codeGenPostRequest.fileIds.add(record.get("file_id").asInt());
                     fixIssue1(record.get("method_id").asInt(), record.get("modifiers").asString());
                 }
 
-                Integer fixId = sendPostRequestCodeGen("http://codegen-cnu.ey.devfactory.com/api/codegen/", new Gson().toJson(codeGenPostRequest)).id;
+                Integer fixId = sendPostRequestCodeGen(Constants.CODEGEN_URL, new Gson().toJson(codeGenPostRequest)).id;
 
                 for(Record record : result) {
                     fixesRepo.save(new Fixes(fixId, issueRepo.findById(issueId).get(), sandBoxUrl, Integer.toString(record.get("line").asInt()), record.get("file").asString(), Integer.toString(record.get("columnName").asInt()), false));
@@ -124,16 +120,13 @@ public class IssueController {
             case 2:
                 return "2";
             case 3:
-                result = session.run("match (class:TypeDeclaration)-[:member]->(method:MethodDeclaration)-[:SETS]->(name:SimpleName)<-[:SET_BY]-(:VariableDeclarationFragment)<-[:fragment]-(field:FieldDeclaration) where field.modifiers contains \"static\" and not field.modifiers contains \"final\" and not method.modifiers contains \"synchronized\"\n" +
-                        "with method, class, name\n" +
-                        "match (file:File)-[:DEFINE]->(class)\n" +
-                        "return id(method) as method_id, id(file) as file_id, method.line as line, method.file as file, method.col as columnName, name.name as name").list();
+                result = session.run(Constants.QUERY2).list();
                 for(Record record : result) {
                     codeGenPostRequest.fileIds.add(record.get("file_id").asInt());
                     fixIssue3(record.get("method_id").asInt(), record.get("modifiers").asString());
                 }
 
-                fixId = sendPostRequestCodeGen("http://codegen-cnu.ey.devfactory.com/api/codegen/", new Gson().toJson(codeGenPostRequest)).id;
+                fixId = sendPostRequestCodeGen(Constants.CODEGEN_URL, new Gson().toJson(codeGenPostRequest)).id;
 
                 for(Record record : result) {
                     fixesRepo.save(new Fixes(fixId, issueRepo.findById(issueId).get(), sandBoxUrl, Integer.toString(record.get("line").asInt()), record.get("file").asString(), Integer.toString(record.get("columnName").asInt()), false));
