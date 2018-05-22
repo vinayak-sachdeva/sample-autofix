@@ -1,12 +1,15 @@
 package hello.helper;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class GetResponseIssue {
-    private Integer id;
-    private String issueType;
-    private String line;
-    private String file;
-    private String columnName;
-    private Boolean isFixed;
+    @Getter @Setter private Integer id;
+    @Getter @Setter private String issueType;
+    @Getter @Setter private String line;
+    @Getter @Setter private String file;
+    @Getter @Setter private String columnName;
+    @Getter @Setter private Boolean isFixed;
 
     public GetResponseIssue(Integer id, String issueType, String line, String file, String columnName, Boolean isFixed) {
         this.id = id;

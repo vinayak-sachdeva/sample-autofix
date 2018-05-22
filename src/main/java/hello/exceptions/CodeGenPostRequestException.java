@@ -1,15 +1,12 @@
 package hello.exceptions;
 
-import hello.helper.CodeGenPostRequest;
+import lombok.Getter;
+import lombok.Setter;
 
 public class CodeGenPostRequestException extends Exception {
-    private String message;
+    @Getter @Setter private String message;
 
     public CodeGenPostRequestException(String message) {
         this.message = message;
-    }
-
-    public String getMessage() {
-        return message;
     }
 }

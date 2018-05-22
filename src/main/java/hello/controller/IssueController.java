@@ -109,7 +109,7 @@ public class IssueController {
                 }
 
                 try {
-                    fixId = sendPostRequestCodeGen(Constants.CODEGEN_URL, new Gson().toJson(codeGenPostRequest)).id;
+                    fixId = sendPostRequestCodeGen(Constants.CODEGEN_URL, new Gson().toJson(codeGenPostRequest)).getId();
                 } catch (CodeGenPostRequestException exception) {
                     return new  Gson().toJson(new PostResponse(exception.getMessage()));
                 }
@@ -130,7 +130,7 @@ public class IssueController {
                     fixIssue3(record.get("method_id").asInt(), record.get("modifiers").asString());
                 }
                 try {
-                    fixId = sendPostRequestCodeGen(Constants.CODEGEN_URL, new Gson().toJson(codeGenPostRequest)).id;
+                    fixId = sendPostRequestCodeGen(Constants.CODEGEN_URL, new Gson().toJson(codeGenPostRequest)).getId();
                 } catch (CodeGenPostRequestException exception) {
                     return new Gson().toJson(new PostResponse(exception.getMessage()));
                 }

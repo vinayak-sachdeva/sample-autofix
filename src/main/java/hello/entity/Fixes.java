@@ -1,25 +1,28 @@
 package hello.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 
 @Entity
 public class Fixes {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    @Getter @Setter private Integer id;
 
-    private Integer fixId;
+    @Getter @Setter private Integer fixId;
 
     @ManyToOne
     @JoinColumn(name = "issueId", referencedColumnName = "issueId")
-    private Issue issueId;
+    @Getter @Setter private Issue issueId;
 
-    private String sandBoxUrl;
-    private String line;
-    private String file;
-    private String columnName;
-    private Boolean fixed;
-    private String s3Link;
+    @Getter @Setter private String sandBoxUrl;
+    @Getter @Setter private String line;
+    @Getter @Setter private String file;
+    @Getter @Setter private String columnName;
+    @Getter @Setter private Boolean fixed;
+    @Getter @Setter private String s3Link;
 
     public Fixes() {}
 
@@ -40,32 +43,8 @@ public class Fixes {
         this.fixed = fixed;
     }
 
-    public Integer getFixId() {
-        return fixId;
-    }
-
     public Integer getissueId() {
         return issueId.getIssueId();
-    }
-
-    public String getSandBoxUrl() {
-        return sandBoxUrl;
-    }
-
-    public String getLine() {
-        return line;
-    }
-
-    public String getFile() {
-        return file;
-    }
-
-    public String getColumnName() {
-        return columnName;
-    }
-
-    public String getS3Link() {
-        return s3Link;
     }
 
     public Boolean isFixed() {

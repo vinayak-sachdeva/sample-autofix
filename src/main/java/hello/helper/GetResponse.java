@@ -1,14 +1,17 @@
 package hello.helper;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class GetResponse {
-    private Integer fixId;
-    private List<GetResponseIssue> issues;
-    private String s3Link;
-    private String status;
+    @Getter @Setter private Integer fixId;
+    @Setter private List<GetResponseIssue> issues;
+    @Getter @Setter private String s3Link;
+    @Getter @Setter private String status;
 
     public GetResponse(Integer fixId, String s3Link, String status) {
         this.fixId = fixId;

@@ -1,9 +1,12 @@
 package hello.helper;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class PostResponse {
-    private Integer fixId;
-    private String status;
-    private String message;
+    @Getter @Setter private Integer fixId;
+    @Getter @Setter private String status;
+    @Getter @Setter private String message;
 
     public PostResponse(String message) {
         this.message = message;
@@ -13,9 +16,5 @@ public class PostResponse {
     public PostResponse(Integer fixId, String status) {
         this.fixId = fixId;
         this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
     }
 }

@@ -1,13 +1,16 @@
 package hello.helper;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.HashSet;
 import java.util.Set;
 
 public class CodeGenPostRequest {
-    String url;
-    String username;
-    String password;
-    public Set<Integer> fileIds;
+    @Getter @Setter String url;
+    @Getter @Setter String username;
+    @Getter @Setter String password;
+    @Getter @Setter public Set<Integer> fileIds;
 
     public CodeGenPostRequest(String url, String username, String password) {
         this.url = url;
