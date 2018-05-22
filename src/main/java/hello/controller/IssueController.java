@@ -110,6 +110,10 @@ public class IssueController {
 
                 Integer fixId = sendPostRequestCodeGen(Constants.CODEGEN_URL, new Gson().toJson(codeGenPostRequest)).id;
 
+                if (fixId == -1) {
+                    return "{message:\"some error occured\"}";
+                }
+
                 for(Record record : result) {
                     fixesRepo.save(new Fixes(fixId, issueRepo.findById(issueId).get(), sandBoxUrl, Integer.toString(record.get("line").asInt()), record.get("file").asString(), Integer.toString(record.get("columnName").asInt()), false));
                 }
