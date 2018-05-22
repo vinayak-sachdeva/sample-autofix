@@ -100,7 +100,7 @@ public class IssueController {
         List<Record> result;
         switch (issueId) {
             case 1:
-                result = session.run(Constants.QUERY1).list();
+                result = session.run(Constants.MODIFIER_ORDER_FIX_NEO4J_QUERY).list();
                 for(Record record : result) {
                     codeGenPostRequest.fileIds.add(record.get("file_id").asInt());
                     fixIssue1(record.get("method_id").asInt(), record.get("modifiers").asString());
@@ -122,7 +122,7 @@ public class IssueController {
             case 2:
                 return "2";
             case 3:
-                result = session.run(Constants.QUERY2).list();
+                result = session.run(Constants.LAZY_INITIALIZATION_SYNCHRONIZATION_NEO4J_QUERY).list();
                 for(Record record : result) {
                     codeGenPostRequest.fileIds.add(record.get("file_id").asInt());
                     fixIssue3(record.get("method_id").asInt(), record.get("modifiers").asString());
