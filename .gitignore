@@ -1,3 +1,9 @@
 .idea/
 
+*.class
 
+.gradle
+
+gradlew
+
+application.properties
