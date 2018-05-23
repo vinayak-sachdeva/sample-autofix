@@ -8,9 +8,9 @@ public class PostResponse {
     @Getter @Setter private String status;
     @Getter @Setter private String message;
 
-    public PostResponse(String message) {
+    public PostResponse(String message, String status) {
         this.message = message;
-        this.status = "500";
+        this.status = status;
     }
 
     public PostResponse(Integer fixId, String status) {

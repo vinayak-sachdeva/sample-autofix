@@ -93,53 +93,74 @@ public class IssueController {
         session.run("match (n) where id(n)=" + methodId + " set n.modifiers=\"" + newModifiers + "\"");
     }
 
+    private Integer modifierOrderFix(String sandBoxUrl) throws CodeGenPostRequestException {
+        setNeo4jDriver(sandBoxUrl);
+        Session session = driver.session();
+        CodeGenPostRequest codeGenPostRequest = new CodeGenPostRequest(sandBoxUrl, Constants.USER, Constants.PASS);
+        List<Record> result = session.run(Constants.MODIFIER_ORDER_FIX_NEO4J_QUERY).list();
+        Integer fixId;
+        for(Record record : result) {
+            codeGenPostRequest.fileIds.add(record.get("file_id").asInt());
+            fixIssue1(record.get("method_id").asInt(), record.get("modifiers").asString());
+        }
+
+        try {
+            fixId = sendPostRequestCodeGen(Constants.CODEGEN_URL, new Gson().toJson(codeGenPostRequest)).getId();
+        } catch (CodeGenPostRequestException exception) {
+            throw exception;
+        }
+
+        for(Record record : result) {
+            fixesRepo.save(new Fixes(fixId, issueRepo.findById(1).get(), sandBoxUrl, Integer.toString(record.get("line").asInt()), record.get("file").asString(), Integer.toString(record.get("columnName").asInt()), false));
+        }
+        session.close();
+        driver.close();
+        return fixId;
+    }
+
+    private Integer lazyInitializationFix(String sandBoxUrl) throws CodeGenPostRequestException {
+        setNeo4jDriver(sandBoxUrl);
+        Session session = driver.session();
+        CodeGenPostRequest codeGenPostRequest = new CodeGenPostRequest(sandBoxUrl, Constants.USER, Constants.PASS);
+        List<Record> result = session.run(Constants.LAZY_INITIALIZATION_SYNCHRONIZATION_NEO4J_QUERY).list();
+        Integer fixId;
+        for(Record record : result) {
+            codeGenPostRequest.fileIds.add(record.get("file_id").asInt());
+            fixIssue3(record.get("method_id").asInt(), record.get("modifiers").asString());
+        }
+        try {
+            fixId = sendPostRequestCodeGen(Constants.CODEGEN_URL, new Gson().toJson(codeGenPostRequest)).getId();
+        } catch (CodeGenPostRequestException exception) {
+            throw exception;
+        }
+        for(Record record : result) {
+            fixesRepo.save(new Fixes(fixId, issueRepo.findById(3).get(), sandBoxUrl, Integer.toString(record.get("line").asInt()), record.get("file").asString(), Integer.toString(record.get("columnName").asInt()), false));
+        }
+        session.close();
+        driver.close();
+        return fixId;
+    }
+
     @GetMapping(path="/fix", produces = "application/json")
     public String fixIssue(@RequestParam(value="issueId") Integer issueId, @RequestParam(value="sandBoxUrl") String sandBoxUrl) {
-        setNeo4jDriver(sandBoxUrl);
-        CodeGenPostRequest codeGenPostRequest = new CodeGenPostRequest(sandBoxUrl, Constants.USER, Constants.PASS);
-        Session session = driver.session();
-        List<Record> result;
         Integer fixId;
         switch (issueId) {
             case 1:
-                result = session.run(Constants.MODIFIER_ORDER_FIX_NEO4J_QUERY).list();
-                for(Record record : result) {
-                    codeGenPostRequest.fileIds.add(record.get("file_id").asInt());
-                    fixIssue1(record.get("method_id").asInt(), record.get("modifiers").asString());
-                }
-
                 try {
-                    fixId = sendPostRequestCodeGen(Constants.CODEGEN_URL, new Gson().toJson(codeGenPostRequest)).getId();
-                } catch (CodeGenPostRequestException exception) {
-                    return new  Gson().toJson(new PostResponse(exception.getMessage()));
+                    fixId = modifierOrderFix(sandBoxUrl);
+                    return new Gson().toJson(new PostResponse(fixId, "200"));
+                } catch(CodeGenPostRequestException exception) {
+                    return new  Gson().toJson(new PostResponse(exception.getMessage(), "500"));
                 }
-
-                for(Record record : result) {
-                    fixesRepo.save(new Fixes(fixId, issueRepo.findById(issueId).get(), sandBoxUrl, Integer.toString(record.get("line").asInt()), record.get("file").asString(), Integer.toString(record.get("columnName").asInt()), false));
-                }
-
-                session.close();
-                driver.close();
-                return new Gson().toJson(new PostResponse(fixId, "200"));
             case 2:
                 return "2";
             case 3:
-                result = session.run(Constants.LAZY_INITIALIZATION_SYNCHRONIZATION_NEO4J_QUERY).list();
-                for(Record record : result) {
-                    codeGenPostRequest.fileIds.add(record.get("file_id").asInt());
-                    fixIssue3(record.get("method_id").asInt(), record.get("modifiers").asString());
-                }
                 try {
-                    fixId = sendPostRequestCodeGen(Constants.CODEGEN_URL, new Gson().toJson(codeGenPostRequest)).getId();
-                } catch (CodeGenPostRequestException exception) {
-                    return new Gson().toJson(new PostResponse(exception.getMessage()));
+                    fixId = lazyInitializationFix(sandBoxUrl);
+                    return new Gson().toJson(new PostResponse(fixId, "200"));
+                } catch(CodeGenPostRequestException exception) {
+                    return new Gson().toJson(new PostResponse(exception.getMessage(), "500"));
                 }
-                for(Record record : result) {
-                    fixesRepo.save(new Fixes(fixId, issueRepo.findById(issueId).get(), sandBoxUrl, Integer.toString(record.get("line").asInt()), record.get("file").asString(), Integer.toString(record.get("columnName").asInt()), false));
-                }
-                session.close();
-                driver.close();
-                return new Gson().toJson(new PostResponse(fixId, "200"));
             default:
                 return "Invalid Issue Id";
         }
